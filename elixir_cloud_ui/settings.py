@@ -15,6 +15,7 @@ import os
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+SETTINGS_PATH = os.path.dirname(os.path.dirname(__file__))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
@@ -28,11 +29,23 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+OIDC_RP_SIGN_ALGO='RS256'
+OIDC_OP_JWKS_ENDPOINT='https://login.elixir-czech.org/oidc/jwk'
+OIDC_VERIFY_JWT=False
+OIDC_USE_NONCE=False
+
+OIDC_OP_AUTHORIZATION_ENDPOINT='https://login.elixir-czech.org/oidc/authorize'
+OIDC_OP_TOKEN_ENDPOINT='https://login.elixir-czech.org/oidc/token'
+OIDC_OP_USER_ENDPOINT='https://login.elixir-czech.org/oidc/userinfo'
+LOGIN_REDIRECT_URL='http://localhost:8000/ui/'
+LOGOUT_REDIRECT_URL='http://localhost:8000/ui'
+
 # Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
+    'mozilla_django_oidc',  # Load after auth
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
@@ -54,7 +67,7 @@ ROOT_URLCONF = 'elixir_cloud_ui.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(SETTINGS_PATH, 'ui', 'templates'),],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -99,6 +112,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Add 'mozilla_django_oidc' authentication backend
+AUTHENTICATION_BACKENDS = (
+    'mozilla_django_oidc.auth.OIDCAuthenticationBackend',
+    # ...
+)
+
+OIDC_RP_CLIENT_ID = os.environ['OIDC_RP_CLIENT_ID']
+OIDC_RP_CLIENT_SECRET = os.environ['OIDC_RP_CLIENT_SECRET']
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.2/topics/i18n/
